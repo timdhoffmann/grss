@@ -1,3 +1,5 @@
+use std::{error::Error, io::{BufReader, BufRead}};
+
 use clap::Parser;
 
 /// Search for a string in a file and display all matching lines.
@@ -9,14 +11,19 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
     println!("{:?}, {:?}", args.pattern, args.path);
 
-    let content = std::fs::read_to_string(&args.path).expect("Could not read file.");
-    for line in content.lines() {
-        if line.contains(&args.pattern) {
-            println!("{line}");
+    let file = std::fs::File::open(&args.path)?;
+    let reader = BufReader::new(file);
+    let lines = reader.lines();
+
+    for line in lines {
+        if line.as_ref().unwrap().contains(&args.pattern) {
+            println!("{}", line.unwrap());
         }
     }
+
+    Ok(())
 }

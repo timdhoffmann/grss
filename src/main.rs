@@ -1,4 +1,8 @@
-use std::{error::Error, io::{BufReader, BufRead}};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
+use anyhow::{Context, Result};
 
 use clap::Parser;
 
@@ -11,18 +15,22 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let args = Cli::parse();
     println!("{:?}, {:?}", args.pattern, args.path);
 
-    let file = std::fs::File::open(&args.path)?;
+    let file = File::open(&args.path)
+        .with_context(|| format!("Could not read file '{}'", args.path.display()))?;
     let reader = BufReader::new(file);
-    let lines = reader.lines();
+    // let lines = reader.lines();
 
-    for line in lines {
-        if line.as_ref().unwrap().contains(&args.pattern) {
+    for mut line in reader.lines() {
+        if line.as_mut().unwrap().contains(&args.pattern) {
             println!("{}", line.unwrap());
         }
+        // if line.as_ref().unwrap().contains(&args.pattern) {
+            // println!("{}", line.unwrap());
+        // }
     }
 
     Ok(())

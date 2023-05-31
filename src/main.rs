@@ -1,8 +1,8 @@
+use anyhow::{Context, Result};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
 };
-use anyhow::{Context, Result};
 
 use clap::Parser;
 
@@ -24,14 +24,24 @@ fn main() -> Result<()> {
     let reader = BufReader::new(file);
     // let lines = reader.lines();
 
-    for mut line in reader.lines() {
-        if line.as_mut().unwrap().contains(&args.pattern) {
-            println!("{}", line.unwrap());
-        }
-        // if line.as_ref().unwrap().contains(&args.pattern) {
-            // println!("{}", line.unwrap());
-        // }
-    }
+    find_matches(reader, &args.pattern, &mut std::io::stdout());
 
     Ok(())
 }
+
+fn find_matches(reader: BufReader<File>, pattern: &str, mut writer: impl std::io::Write) {
+    for mut line in reader.lines() {
+        if line.as_mut().unwrap().contains(pattern) {
+            writeln!(writer, "{}", line.unwrap());
+        }
+        // if line.as_ref().unwrap().contains(&args.pattern) {
+        // println!("{}", line.unwrap());
+        // }
+    }
+}
+
+// #[test]
+// fn find_match() {
+//     let content = "test".to_string();
+//     let reader = BufReader::new(content);
+// }

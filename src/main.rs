@@ -29,7 +29,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn find_matches(reader: BufReader<File>, pattern: &str, mut writer: impl std::io::Write) {
+fn find_matches(reader: impl std::io::BufRead, pattern: &str, mut writer: impl std::io::Write) {
     for mut line in reader.lines() {
         if line.as_mut().unwrap().contains(pattern) {
             writeln!(writer, "{}", line.unwrap());
@@ -40,8 +40,16 @@ fn find_matches(reader: BufReader<File>, pattern: &str, mut writer: impl std::io
     }
 }
 
-// #[test]
-// fn find_match() {
-//     let content = "test".to_string();
-//     let reader = BufReader::new(content);
-// }
+#[test]
+fn test_find_matches() {
+    let content = "Line 1\nLine 2\nLine 3\n";
+    let pattern = "2";
+
+    let reader = BufReader::new(content.as_bytes());
+    let mut writer = Vec::new();
+
+    find_matches(reader, pattern, &mut writer);
+
+    let result = String::from_utf8(writer).unwrap();
+    assert_eq!("Line 2\n", result);
+}
